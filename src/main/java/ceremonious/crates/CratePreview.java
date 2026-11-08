@@ -5,6 +5,11 @@ import cn.nukkit.inventory.InventoryType;
 import cn.nukkit.item.Item;
 import me.iwareq.fakeinventories.FakeInventory;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 public class CratePreview {
 
     private static final int INVENTORY_SIZE = 54;
@@ -27,30 +32,89 @@ public class CratePreview {
                 event.setCancelled(true)
         );
 
+        // Calcular el peso total de todas las recompensas.
+        // Incluye objetos y comandos.
+        double totalWeight = 0;
+
+        for (Integer weight : crate.getRewards().values()) {
+            if (weight != null && weight > 0) {
+                totalWeight += weight;
+            }
+        }
+
         int slot = 0;
 
         // Mostrar únicamente recompensas de tipo Item.
-        for (Reward reward : crate.getRewards().keySet()) {
+        for (Map.Entry<Reward, Integer> entry :
+                crate.getRewards().entrySet()) {
 
             if (slot >= INVENTORY_SIZE) {
                 break;
             }
 
-            if (reward == null || reward.getType() != RewardType.Item) {
+            Reward reward = entry.getKey();
+
+            if (reward == null ||
+                    reward.getType() != RewardType.Item) {
                 continue;
             }
 
-            Item item = reward.getItemReward();
+            Item originalItem = reward.getItemReward();
 
-            if (item == null || item.getId() == 0) {
+            if (originalItem == null ||
+                    originalItem.getId() == 0) {
                 continue;
             }
 
             // Clonar para no modificar la recompensa original.
-            inventory.setItem(slot, item.clone());
+            Item previewItem = originalItem.clone();
+
+            // Conservar el lore original.
+            List<String> lore = new ArrayList<>();
+
+            String[] originalLore = previewItem.getLore();
+
+            if (originalLore != null) {
+                for (String line : originalLore) {
+                    lore.add(line);
+                }
+            }
+
+            // Separador visual.
+            lore.add(" ");
+
+            // Nombre de la recompensa.
+            String customName = previewItem.getCustomName();
+
+            if (customName == null || customName.isEmpty()) {
+                customName = previewItem.getName();
+            }
+
+            lore.add("§7Nombre: §f" + customName);
+
+            // Cantidad que recibe el jugador.
+            lore.add("§7Cantidad: §f" + originalItem.getCount());
+
+            // Probabilidad real basada en todos los pesos.
+            int weight = entry.getValue() != null
+                    ? entry.getValue()
+                    : 0;
+
+            double chance = totalWeight > 0
+                    ? (weight * 100.0) / totalWeight
+                    : 0.0;
+
+            lore.add("§7Probabilidad: §a" +
+                    String.format(Locale.US, "%.2f", chance) + "%");
+
+            // Aplicar información adicional sin alterar el objeto original.
+            previewItem.setLore(lore.toArray(new String[0]));
+
+            inventory.setItem(slot, previewItem);
             slot++;
         }
 
         player.addWindow(inventory);
     }
 }
+

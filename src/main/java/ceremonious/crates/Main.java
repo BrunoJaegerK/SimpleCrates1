@@ -402,6 +402,11 @@ public class Main extends PluginBase implements Listener {
                   break;
                }
 
+               // Evitar abrir otra crate mientras se reproduce una animación.
+               if (CrateOpeningAnimation.isPlaying(p)) {
+                  break;
+               }
+
                // Desde aquí se conserva la lógica original de apertura.
                Long time = System.currentTimeMillis() - 5L;
 
@@ -427,9 +432,94 @@ public class Main extends PluginBase implements Listener {
                   } else {
                      this.keysConfig.set("keys." + p.getUniqueId() + "." + crate.getName(), value - 1);
                      this.keysConfig.save();
+
                      if (crate.getRewards().isEmpty()) {
                         p.sendMessage(TextFormat.colorize(prefix + " This crate is empty!"));
                      } else {
+
+                        Runnable rewardAction = () -> {
+                           p.sendMessage(TextFormat.colorize(prefix + " You opened a crate!"));
+
+                           if (crate.getRounds() > crate.getRewards().size()) {
+                              crate.setRounds(crate.getRewards().size());
+                           }
+
+                           for (int i = 0; i < crate.getRounds(); ++i) {
+                              if (!crate.getCommands().isEmpty()) {
+                                 for (Reward command : crate.getCommands()) {
+                                    if (command.getType().equals(RewardType.ConsoleCommand)) {
+                                       this.server.dispatchCommand(
+                                               this.server.getConsoleSender(),
+                                               command.getRewardCommand().replace("{user}", p.getName())
+                                       );
+                                    } else if (command.getType().equals(RewardType.PlayerCommand)) {
+                                       this.server.dispatchCommand(
+                                               p,
+                                               command.getRewardCommand().replace("{user}", p.getName())
+                                       );
+                                    }
+                                 }
+                              }
+
+                              if (!crate.getRewards().isEmpty()) {
+                                 Random rnd = new Random();
+                                 List<Reward> rewardChances = new ArrayList();
+                                 Map<Reward, Integer> map = crate.getRewards();
+
+                                 for (Map.Entry<Reward, Integer> entry : map.entrySet()) {
+                                    for (int x = 0; x < (Integer) entry.getValue(); ++x) {
+                                       rewardChances.add((Reward) entry.getKey());
+                                    }
+                                 }
+
+                                 Reward reward = (Reward) rewardChances.get(rnd.nextInt(rewardChances.size()));
+
+                                 if (reward.getType().equals(RewardType.Item)) {
+                                    p.getInventory().addItem(new Item[]{reward.getItemReward()});
+                                 } else if (reward.getType().equals(RewardType.ConsoleCommand)) {
+                                    this.server.dispatchCommand(
+                                            this.server.getConsoleSender(),
+                                            reward.getRewardCommand().replace("{user}", p.getName())
+                                    );
+                                 } else if (reward.getType().equals(RewardType.PlayerCommand)) {
+                                    this.server.dispatchCommand(
+                                            p,
+                                            reward.getRewardCommand().replace("{user}", p.getName())
+                                    );
+                                 }
+                              }
+                           }
+                        };
+
+                        boolean animationStarted = CrateOpeningAnimation.start(
+                                this,
+                                p,
+                                c,
+                                rewardAction
+                        );
+
+                        if (!animationStarted) {
+                           rewardAction.run();
+                        }
+                     }
+                  }
+               } else if (e.getItem().equals(crate.getKey())) {
+                  if (crate.getRewards().isEmpty()) {
+                     p.sendMessage(TextFormat.colorize(prefix + " This crate is empty!"));
+                  } else {
+
+                     // Consumir la llave física antes de iniciar la animación.
+                     int itemcount = p.getInventory().getItemInHand().getCount();
+                     Item newkeys = crate.getKey();
+                     newkeys.setCount(itemcount - 1);
+
+                     if (itemcount == 1) {
+                        p.getInventory().remove(p.getInventory().getItemInHand());
+                     } else {
+                        p.getInventory().setItemInHand(newkeys);
+                     }
+
+                     Runnable rewardAction = () -> {
                         p.sendMessage(TextFormat.colorize(prefix + " You opened a crate!"));
 
                         if (crate.getRounds() > crate.getRewards().size()) {
@@ -440,9 +530,15 @@ public class Main extends PluginBase implements Listener {
                            if (!crate.getCommands().isEmpty()) {
                               for (Reward command : crate.getCommands()) {
                                  if (command.getType().equals(RewardType.ConsoleCommand)) {
-                                    this.server.dispatchCommand(this.server.getConsoleSender(), command.getRewardCommand().replace("{user}", p.getName()));
+                                    this.server.dispatchCommand(
+                                            this.server.getConsoleSender(),
+                                            command.getRewardCommand().replace("{user}", p.getName())
+                                    );
                                  } else if (command.getType().equals(RewardType.PlayerCommand)) {
-                                    this.server.dispatchCommand(p, command.getRewardCommand().replace("{user}", p.getName()));
+                                    this.server.dispatchCommand(
+                                            p,
+                                            command.getRewardCommand().replace("{user}", p.getName())
+                                    );
                                  }
                               }
                            }
@@ -458,71 +554,36 @@ public class Main extends PluginBase implements Listener {
                                  }
                               }
 
-                              Reward reward = (Reward) rewardChances.get(rnd.nextInt(rewardChances.size()));
+                              Reward reward = (Reward) rewardChances.get(
+                                      rnd.nextInt(rewardChances.size())
+                              );
 
                               if (reward.getType().equals(RewardType.Item)) {
                                  p.getInventory().addItem(new Item[]{reward.getItemReward()});
                               } else if (reward.getType().equals(RewardType.ConsoleCommand)) {
-                                 this.server.dispatchCommand(this.server.getConsoleSender(), reward.getRewardCommand().replace("{user}", p.getName()));
+                                 this.server.dispatchCommand(
+                                         this.server.getConsoleSender(),
+                                         reward.getRewardCommand().replace("{user}", p.getName())
+                                 );
                               } else if (reward.getType().equals(RewardType.PlayerCommand)) {
-                                 this.server.dispatchCommand(p, reward.getRewardCommand().replace("{user}", p.getName()));
+                                 this.server.dispatchCommand(
+                                         p,
+                                         reward.getRewardCommand().replace("{user}", p.getName())
+                                 );
                               }
                            }
                         }
-                     }
-                  }
-               } else if (e.getItem().equals(crate.getKey())) {
-                  if (crate.getRewards().isEmpty()) {
-                     p.sendMessage(TextFormat.colorize(prefix + " This crate is empty!"));
-                  } else {
-                     p.sendMessage(TextFormat.colorize(prefix + " You opened a crate!"));
+                     };
 
-                     int itemcount = p.getInventory().getItemInHand().getCount();
-                     Item newkeys = crate.getKey();
-                     newkeys.setCount(itemcount - 1);
+                     boolean animationStarted = CrateOpeningAnimation.start(
+                             this,
+                             p,
+                             c,
+                             rewardAction
+                     );
 
-                     if (itemcount == 1) {
-                        p.getInventory().remove(p.getInventory().getItemInHand());
-                     } else {
-                        p.getInventory().setItemInHand(newkeys);
-                     }
-
-                     if (crate.getRounds() > crate.getRewards().size()) {
-                        crate.setRounds(crate.getRewards().size());
-                     }
-
-                     for (int i = 0; i < crate.getRounds(); ++i) {
-                        if (!crate.getCommands().isEmpty()) {
-                           for (Reward command : crate.getCommands()) {
-                              if (command.getType().equals(RewardType.ConsoleCommand)) {
-                                 this.server.dispatchCommand(this.server.getConsoleSender(), command.getRewardCommand().replace("{user}", p.getName()));
-                              } else if (command.getType().equals(RewardType.PlayerCommand)) {
-                                 this.server.dispatchCommand(p, command.getRewardCommand().replace("{user}", p.getName()));
-                              }
-                           }
-                        }
-
-                        if (!crate.getRewards().isEmpty()) {
-                           Random rnd = new Random();
-                           List<Reward> rewardChances = new ArrayList();
-                           Map<Reward, Integer> map = crate.getRewards();
-
-                           for (Map.Entry<Reward, Integer> entry : map.entrySet()) {
-                              for (int x = 0; x < (Integer) entry.getValue(); ++x) {
-                                 rewardChances.add((Reward) entry.getKey());
-                              }
-                           }
-
-                           Reward reward = (Reward) rewardChances.get(rnd.nextInt(rewardChances.size()));
-
-                           if (reward.getType().equals(RewardType.Item)) {
-                              p.getInventory().addItem(new Item[]{reward.getItemReward()});
-                           } else if (reward.getType().equals(RewardType.ConsoleCommand)) {
-                              this.server.dispatchCommand(this.server.getConsoleSender(), reward.getRewardCommand().replace("{user}", p.getName()));
-                           } else if (reward.getType().equals(RewardType.PlayerCommand)) {
-                              this.server.dispatchCommand(p, reward.getRewardCommand().replace("{user}", p.getName()));
-                           }
-                        }
+                     if (!animationStarted) {
+                        rewardAction.run();
                      }
                   }
                } else {

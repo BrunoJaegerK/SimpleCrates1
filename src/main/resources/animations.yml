@@ -1,0 +1,35 @@
+# SimpleCrates - Opening Animations
+
+animations:
+  # Animación clásica
+  classic:
+    enabled: true
+
+    # Duración en ticks (20 ticks = 1 segundo)
+    duration: 60
+
+    # Partículas
+    particles:
+      enabled: true
+      type: "flame"
+      radius: 0.8
+      height: 1.0
+
+    # Sonidos durante la apertura
+    sounds:
+      enabled: true
+      opening: "RANDOM_CHESTOPEN"
+      volume: 1.0
+      pitch-start: 0.8
+      pitch-end: 1.8
+
+  # Animación de ruleta (la implementaremos después)
+  roulette:
+    enabled: true
+    duration: 100
+
+    sounds:
+      enabled: true
+      spin: "NOTE"
+      finish: "LEVEL_UP"
+      volume: 1.0
