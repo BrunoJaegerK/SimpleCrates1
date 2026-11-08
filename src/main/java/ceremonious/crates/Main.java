@@ -421,7 +421,7 @@ public class Main extends PluginBase implements Listener {
                   int value = this.keysConfig.getInt("keys." + p.getUniqueId() + "." + crate.getName());
 
                   if (value <= 0) {
-                     CratesFailureEffect.play(p, c);
+                     CrateFailureEffect.play(p, c);
                      p.sendMessage(TextFormat.colorize(prefix + " You do not have a " + crate.getDisplayName() + " Key!"));
                      this.keysConfig.set("keys." + p.getUniqueId() + "." + crate.getName(), 0);
                   } else {
