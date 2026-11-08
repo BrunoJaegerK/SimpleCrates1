@@ -1,21 +1,18 @@
-# SimpleCrates - Opening Animations
-
 animations:
+  # Modo de animación: classic o roulette
+  mode: "roulette"
+
   # Animación clásica
   classic:
     enabled: true
-
-    # Duración en ticks (20 ticks = 1 segundo)
     duration: 60
 
-    # Partículas
     particles:
       enabled: true
       type: "flame"
       radius: 0.8
       height: 1.0
 
-    # Sonidos durante la apertura
     sounds:
       enabled: true
       opening: "RANDOM_CHESTOPEN"
@@ -23,7 +20,7 @@ animations:
       pitch-start: 0.8
       pitch-end: 1.8
 
-  # Animación de ruleta (la implementaremos después)
+  # Animación de ruleta
   roulette:
     enabled: true
     duration: 100
@@ -32,4 +29,4 @@ animations:
       enabled: true
       spin: "NOTE"
       finish: "LEVEL_UP"
-      volume: 1.0
+      volume: 1.00

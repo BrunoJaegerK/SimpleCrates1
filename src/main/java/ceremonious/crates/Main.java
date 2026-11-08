@@ -403,7 +403,8 @@ public class Main extends PluginBase implements Listener {
                }
 
                // Evitar abrir otra crate mientras se reproduce una animación.
-               if (CrateOpeningAnimation.isPlaying(p)) {
+               if (CrateOpeningAnimation.isPlaying(p)
+                       || CrateRouletteAnimation.isPlaying(p)) {
                   break;
                }
 
@@ -437,70 +438,7 @@ public class Main extends PluginBase implements Listener {
                         p.sendMessage(TextFormat.colorize(prefix + " This crate is empty!"));
                      } else {
 
-                        Runnable rewardAction = () -> {
-                           p.sendMessage(TextFormat.colorize(prefix + " You opened a crate!"));
-
-                           if (crate.getRounds() > crate.getRewards().size()) {
-                              crate.setRounds(crate.getRewards().size());
-                           }
-
-                           for (int i = 0; i < crate.getRounds(); ++i) {
-                              if (!crate.getCommands().isEmpty()) {
-                                 for (Reward command : crate.getCommands()) {
-                                    if (command.getType().equals(RewardType.ConsoleCommand)) {
-                                       this.server.dispatchCommand(
-                                               this.server.getConsoleSender(),
-                                               command.getRewardCommand().replace("{user}", p.getName())
-                                       );
-                                    } else if (command.getType().equals(RewardType.PlayerCommand)) {
-                                       this.server.dispatchCommand(
-                                               p,
-                                               command.getRewardCommand().replace("{user}", p.getName())
-                                       );
-                                    }
-                                 }
-                              }
-
-                              if (!crate.getRewards().isEmpty()) {
-                                 Random rnd = new Random();
-                                 List<Reward> rewardChances = new ArrayList();
-                                 Map<Reward, Integer> map = crate.getRewards();
-
-                                 for (Map.Entry<Reward, Integer> entry : map.entrySet()) {
-                                    for (int x = 0; x < (Integer) entry.getValue(); ++x) {
-                                       rewardChances.add((Reward) entry.getKey());
-                                    }
-                                 }
-
-                                 Reward reward = (Reward) rewardChances.get(rnd.nextInt(rewardChances.size()));
-
-                                 if (reward.getType().equals(RewardType.Item)) {
-                                    p.getInventory().addItem(new Item[]{reward.getItemReward()});
-                                 } else if (reward.getType().equals(RewardType.ConsoleCommand)) {
-                                    this.server.dispatchCommand(
-                                            this.server.getConsoleSender(),
-                                            reward.getRewardCommand().replace("{user}", p.getName())
-                                    );
-                                 } else if (reward.getType().equals(RewardType.PlayerCommand)) {
-                                    this.server.dispatchCommand(
-                                            p,
-                                            reward.getRewardCommand().replace("{user}", p.getName())
-                                    );
-                                 }
-                              }
-                           }
-                        };
-
-                        boolean animationStarted = CrateOpeningAnimation.start(
-                                this,
-                                p,
-                                c,
-                                rewardAction
-                        );
-
-                        if (!animationStarted) {
-                           rewardAction.run();
-                        }
+                        startCrateOpening(crate, p, c);
                      }
                   }
                } else if (e.getItem().equals(crate.getKey())) {
@@ -519,72 +457,7 @@ public class Main extends PluginBase implements Listener {
                         p.getInventory().setItemInHand(newkeys);
                      }
 
-                     Runnable rewardAction = () -> {
-                        p.sendMessage(TextFormat.colorize(prefix + " You opened a crate!"));
-
-                        if (crate.getRounds() > crate.getRewards().size()) {
-                           crate.setRounds(crate.getRewards().size());
-                        }
-
-                        for (int i = 0; i < crate.getRounds(); ++i) {
-                           if (!crate.getCommands().isEmpty()) {
-                              for (Reward command : crate.getCommands()) {
-                                 if (command.getType().equals(RewardType.ConsoleCommand)) {
-                                    this.server.dispatchCommand(
-                                            this.server.getConsoleSender(),
-                                            command.getRewardCommand().replace("{user}", p.getName())
-                                    );
-                                 } else if (command.getType().equals(RewardType.PlayerCommand)) {
-                                    this.server.dispatchCommand(
-                                            p,
-                                            command.getRewardCommand().replace("{user}", p.getName())
-                                    );
-                                 }
-                              }
-                           }
-
-                           if (!crate.getRewards().isEmpty()) {
-                              Random rnd = new Random();
-                              List<Reward> rewardChances = new ArrayList();
-                              Map<Reward, Integer> map = crate.getRewards();
-
-                              for (Map.Entry<Reward, Integer> entry : map.entrySet()) {
-                                 for (int x = 0; x < (Integer) entry.getValue(); ++x) {
-                                    rewardChances.add((Reward) entry.getKey());
-                                 }
-                              }
-
-                              Reward reward = (Reward) rewardChances.get(
-                                      rnd.nextInt(rewardChances.size())
-                              );
-
-                              if (reward.getType().equals(RewardType.Item)) {
-                                 p.getInventory().addItem(new Item[]{reward.getItemReward()});
-                              } else if (reward.getType().equals(RewardType.ConsoleCommand)) {
-                                 this.server.dispatchCommand(
-                                         this.server.getConsoleSender(),
-                                         reward.getRewardCommand().replace("{user}", p.getName())
-                                 );
-                              } else if (reward.getType().equals(RewardType.PlayerCommand)) {
-                                 this.server.dispatchCommand(
-                                         p,
-                                         reward.getRewardCommand().replace("{user}", p.getName())
-                                 );
-                              }
-                           }
-                        }
-                     };
-
-                     boolean animationStarted = CrateOpeningAnimation.start(
-                             this,
-                             p,
-                             c,
-                             rewardAction
-                     );
-
-                     if (!animationStarted) {
-                        rewardAction.run();
-                     }
+                     startCrateOpening(crate, p, c);
                   }
                } else {
                   CrateFailureEffect.play(p, c);
@@ -594,6 +467,157 @@ public class Main extends PluginBase implements Listener {
                break;
             }
          }
+      }
+   }
+
+
+   private void startCrateOpening(
+           Crate crate,
+           Player player,
+           Location location
+   ) {
+      if (!CrateAnimationConfig.isLoaded()) {
+         CrateAnimationConfig.load(this);
+      }
+
+      if (crate.getRewards().isEmpty()) {
+         player.sendMessage(TextFormat.colorize(
+                 prefix + " This crate is empty!"
+         ));
+         return;
+      }
+
+      // Mantener el límite original de rondas.
+      if (crate.getRounds() > crate.getRewards().size()) {
+         crate.setRounds(crate.getRewards().size());
+      }
+
+      int rounds = crate.getRounds();
+
+      // Seleccionar anticipadamente los premios con las mismas
+      // probabilidades ponderadas que utilizaba el código original.
+      List<Reward> rewardChances = new ArrayList<>();
+
+      for (Map.Entry<Reward, Integer> entry :
+              crate.getRewards().entrySet()) {
+
+         for (int x = 0; x < entry.getValue(); x++) {
+            rewardChances.add(entry.getKey());
+         }
+      }
+
+      if (rewardChances.isEmpty()) {
+         getLogger().warning(
+                 "Crate " + crate.getName()
+                         + " has no valid reward chances."
+         );
+         return;
+      }
+
+      Random random = new Random();
+      List<Reward> selectedRewards = new ArrayList<>();
+
+      for (int i = 0; i < rounds; i++) {
+         selectedRewards.add(
+                 rewardChances.get(random.nextInt(rewardChances.size()))
+         );
+      }
+
+      // La entrega conserva los comandos y el comportamiento original.
+      Runnable rewardAction = () -> {
+         player.sendMessage(TextFormat.colorize(
+                 prefix + " You opened a crate!"
+         ));
+
+         for (int i = 0; i < selectedRewards.size(); i++) {
+
+            // Ejecutar los comandos configurados una vez por ronda.
+            if (!crate.getCommands().isEmpty()) {
+               for (Reward command : crate.getCommands()) {
+
+                  if (command.getType().equals(
+                          RewardType.ConsoleCommand)) {
+
+                     this.server.dispatchCommand(
+                             this.server.getConsoleSender(),
+                             command.getRewardCommand().replace(
+                                     "{user}", player.getName()
+                             )
+                     );
+
+                  } else if (command.getType().equals(
+                          RewardType.PlayerCommand)) {
+
+                     this.server.dispatchCommand(
+                             player,
+                             command.getRewardCommand().replace(
+                                     "{user}", player.getName()
+                             )
+                     );
+                  }
+               }
+            }
+
+            Reward reward = selectedRewards.get(i);
+
+            if (reward.getType().equals(RewardType.Item)) {
+
+               player.getInventory().addItem(
+                       new Item[]{reward.getItemReward()}
+               );
+
+            } else if (reward.getType().equals(
+                    RewardType.ConsoleCommand)) {
+
+               this.server.dispatchCommand(
+                       this.server.getConsoleSender(),
+                       reward.getRewardCommand().replace(
+                               "{user}", player.getName()
+                       )
+               );
+
+            } else if (reward.getType().equals(
+                    RewardType.PlayerCommand)) {
+
+               this.server.dispatchCommand(
+                       player,
+                       reward.getRewardCommand().replace(
+                               "{user}", player.getName()
+                       )
+               );
+            }
+         }
+      };
+
+      // Elegir el tipo de animación configurado.
+      String mode = CrateAnimationConfig.getAnimationMode();
+
+      boolean animationStarted;
+
+      if ("roulette".equalsIgnoreCase(mode)) {
+
+         animationStarted = CrateRouletteAnimation.start(
+                 this,
+                 player,
+                 location,
+                 crate,
+                 selectedRewards,
+                 rewardAction
+         );
+
+      } else {
+
+         animationStarted = CrateOpeningAnimation.start(
+                 this,
+                 player,
+                 location,
+                 rewardAction
+         );
+      }
+
+      // Si la animación no puede iniciarse, entregar los premios.
+      if (!animationStarted) {
+         rewardAction.run();
       }
    }
 

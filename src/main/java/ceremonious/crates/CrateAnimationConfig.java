@@ -35,6 +35,8 @@ public final class CrateAnimationConfig {
         return config != null;
     }
 
+    // Animación clásica
+
     public static boolean isClassicEnabled() {
         return getConfig().getBoolean(
                 "animations.classic.enabled", true
@@ -79,7 +81,7 @@ public final class CrateAnimationConfig {
 
     public static String getClassicOpeningSound() {
         return getConfig().getString(
-                "animations.classic.sounds.opening", "CHEST_OPEN"
+                "animations.classic.sounds.opening", "RANDOM_CHESTOPEN"
         );
     }
 
@@ -101,6 +103,23 @@ public final class CrateAnimationConfig {
         );
     }
 
+    // Selección del modo de animación
+
+    public static String getAnimationMode() {
+        String mode = getConfig().getString(
+                "animations.mode", "classic"
+        );
+
+        if (!mode.equalsIgnoreCase("classic")
+                && !mode.equalsIgnoreCase("roulette")) {
+            return "classic";
+        }
+
+        return mode.toLowerCase();
+    }
+
+    // Animación de ruleta
+
     public static boolean isRouletteEnabled() {
         return getConfig().getBoolean(
                 "animations.roulette.enabled", true
@@ -112,5 +131,30 @@ public final class CrateAnimationConfig {
                 "animations.roulette.duration", 100
         ));
     }
+
+    public static boolean areRouletteSoundsEnabled() {
+        return getConfig().getBoolean(
+                "animations.roulette.sounds.enabled", true
+        );
+    }
+
+    public static String getRouletteSpinSound() {
+        return getConfig().getString(
+                "animations.roulette.sounds.spin", "NOTE"
+        );
+    }
+
+    public static String getRouletteFinishSound() {
+        return getConfig().getString(
+                "animations.roulette.sounds.finish", "LEVEL_UP"
+        );
+    }
+
+    public static float getRouletteSoundVolume() {
+        return (float) getConfig().getDouble(
+                "animations.roulette.sounds.volume", 1.0
+        );
+    }
 }
+
 
