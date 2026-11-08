@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="SimpleCrates">
+    <output-path>$PROJECT_DIR$/out/artifacts/SimpleCrates</output-path>
+    <root id="archive" name="SimpleCrates.jar">
+      <element id="module-output" name="SimpleCrates2" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/server.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/FakeInventories-1.1.8-PM1E-IWareQ.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

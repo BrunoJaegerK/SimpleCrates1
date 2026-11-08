@@ -1,0 +1,17 @@
+# SimpleCrates - Particle Effects
+
+# Activar o desactivar las partículas
+enabled: true
+
+# Tipo de partícula: FLAME, SMOKE, HEART
+particle: FLAME
+
+# Intervalo entre ejecuciones (en ticks)
+# 20 ticks = 1 segundo
+interval-ticks: 10
+
+# Distancia desde el centro de la crate
+radius: 0.7
+
+# Cantidad de partículas alrededor de la crate
+points: 8

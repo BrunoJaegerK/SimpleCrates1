@@ -1,0 +1,19 @@
+main: ceremonious.crates.Main
+name: SimpleCrates
+version: "1.0.2"
+api: ["1.0.8"]
+depend:
+  - FakeInventories
+author: Ceremonious
+description: Ceremonious's simple crates
+commands:
+  crates:
+    aliases: [crate, cr]
+    description: Basic crate command
+    permission: crates.admin
+    permission-message: You don't have the crates.admin permission.
+  keys:
+    aliases: [key, cratekeys]
+    description: Check your crate keys
+    permission: crates.keys
+    permission-message: You don't have the crates.keys permission.
