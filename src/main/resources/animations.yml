@@ -1,32 +1,92 @@
+# ==========================================
+# SimpleCrates - Animation Configuration
+# ==========================================
+
 animations:
-  # Modo de animación: classic o roulette
+
+  # Modo de animación que utilizará la crate.
+  # classic  = Animación clásica con partículas y sonido.
+  # roulette = Ruleta de recompensas dentro de un inventario.
   mode: "roulette"
 
+
+  # ==========================================
   # Animación clásica
+  # ==========================================
+
   classic:
+
+    # Activar o desactivar la animación clásica.
     enabled: true
+
+    # Duración de la animación en ticks.
+    # 20 ticks = 1 segundo.
     duration: 60
 
+    # Configuración de partículas.
     particles:
+
+      # Activar o desactivar las partículas.
       enabled: true
+
+      # Tipo de partícula.
+      # flame = Llamas.
+      # smoke = Humo.
+      # heart = Corazones.
       type: "flame"
+
+      # Distancia desde el centro de la crate.
       radius: 0.8
+
+      # Altura a la que aparecen las partículas.
       height: 1.0
 
+    # Configuración de sonidos.
     sounds:
+
+      # Activar o desactivar los sonidos.
       enabled: true
+
+      # Sonido que se reproduce al iniciar la apertura.
+      # RANDOM_CHESTOPEN = Sonido de apertura de cofre.
       opening: "RANDOM_CHESTOPEN"
+
+      # Volumen del sonido.
       volume: 1.0
+
+      # Tono inicial del sonido.
       pitch-start: 0.8
+
+      # Tono final del sonido.
       pitch-end: 1.8
 
+
+  # ==========================================
   # Animación de ruleta
+  # ==========================================
+
   roulette:
+
+    # Activar o desactivar la animación de ruleta.
     enabled: true
+
+    # Duración de la animación en ticks.
+    # 20 ticks = 1 segundo.
     duration: 100
 
+    # Configuración de sonidos.
     sounds:
+
+      # Activar o desactivar los sonidos de la ruleta.
       enabled: true
+
+      # Sonido que acompaña el movimiento de los objetos.
+      # NOTE = Sonido de nota musical.
       spin: "NOTE"
+
+      # Sonido que se reproduce al finalizar la ruleta.
+      # LEVEL_UP = Sonido de subida de nivel.
       finish: "LEVEL_UP"
+
+      # Volumen de los sonidos.
       volume: 1.00
