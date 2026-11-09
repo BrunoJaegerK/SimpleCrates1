@@ -25,7 +25,7 @@ public final class CrateRouletteAnimation {
             18, 19, 20, 21, 22, 23, 24, 25, 26
     };
 
-    private static final int HOLD_TICKS = 10;
+    private static final int HOLD_TICKS = 40;
 
     private static final Random RANDOM = new Random();
 
@@ -141,9 +141,9 @@ public final class CrateRouletteAnimation {
                 continue;
             }
 
-            for (int i = 0; i < chance; i++) {
-                result.add(reward);
-            }
+            // Una sola entrada por recompensa para visualizar
+            // correctamente el movimiento de la ruleta.
+            result.add(reward);
         }
 
         return result;
@@ -260,7 +260,7 @@ public final class CrateRouletteAnimation {
 
             int interval = Math.max(
                     1,
-                    (int) (1 + progress * 5)
+                    (int) (1 + progress * progress * 9)
             );
 
             if (animationTick % interval == 0) {
@@ -306,7 +306,17 @@ public final class CrateRouletteAnimation {
                 Reward reward;
 
                 if (finalSelection && i == 4) {
+                    // Premio ganador en el centro.
                     reward = selectedReward;
+
+                } else if (finalSelection && (i == 3 || i == 5)) {
+                    // Decoración dorada a los lados del premio.
+                    inventory.setItem(
+                            ROULETTE_SLOTS[i],
+                            Item.get(41).setCustomName("§6§l★ PREMIO ★")
+                    );
+                    continue;
+
                 } else {
                     int index = Math.floorMod(
                             position + i,
@@ -339,7 +349,7 @@ public final class CrateRouletteAnimation {
                 return;
             }
 
-            if (animationTick % 5 != 0) {
+            if (animationTick % 2 != 0) {
                 return;
             }
 
