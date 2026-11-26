@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ceremonious.crates</groupId>
+    <artifactId>simplecrates</artifactId>
+    <version>1.0.3-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>SimpleCrates</name>
+    <description>Crate plugin for NukkitPetteriM1Edition</description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>8</maven.compiler.release>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>local.nukkit</groupId>
+            <artifactId>nukkit-pm1e</artifactId>
+            <version>local</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/server.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>local.nukkit</groupId>
+            <artifactId>fakeinventories-pm1e</artifactId>
+            <version>1.1.8</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/FakeInventories-1.1.8-PM1E-IWareQ.jar</systemPath>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>SimpleCrates</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.14.1</version>
+                <configuration>
+                    <release>${maven.compiler.release}</release>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.2</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>
