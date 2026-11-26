@@ -2,10 +2,8 @@ package ceremonious.crates;
 
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
-import cn.nukkit.level.particle.FlameParticle;
-import cn.nukkit.level.particle.HeartParticle;
+import cn.nukkit.level.particle.GenericParticle;
 import cn.nukkit.level.particle.Particle;
-import cn.nukkit.level.particle.SmokeParticle;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.scheduler.PluginTask;
 import cn.nukkit.utils.Config;
@@ -17,9 +15,9 @@ public class CrateParticleTask extends PluginTask<Main> {
 
     private final Config config;
     private final boolean enabled;
-    private final String particleType;
-    private final double radius;
-    private final int points;
+    private final String defaultParticle;
+    private final double defaultRadius;
+    private final int defaultPoints;
 
     private CrateParticleTask(Main plugin) {
         super(plugin);
@@ -30,15 +28,16 @@ public class CrateParticleTask extends PluginTask<Main> {
         defaults.set("interval-ticks", 10);
         defaults.set("radius", 0.7);
         defaults.set("points", 8);
+        defaults.set("crates", new ConfigSection());
 
         File file = new File(plugin.getDataFolder(), "effects.yml");
         this.config = new Config(file, Config.YAML, defaults);
         this.config.save();
 
         this.enabled = config.getBoolean("enabled", true);
-        this.particleType = config.getString("particle", "FLAME").toUpperCase();
-        this.radius = Math.max(0.1, config.getDouble("radius", 0.7));
-        this.points = Math.max(1, config.getInt("points", 8));
+        this.defaultParticle = normalizeParticle(config.getString("particle", "FLAME"));
+        this.defaultRadius = Math.max(0.1, config.getDouble("radius", 0.7));
+        this.defaultPoints = Math.max(1, config.getInt("points", 8));
     }
 
     public static void start(Main plugin) {
@@ -49,7 +48,6 @@ public class CrateParticleTask extends PluginTask<Main> {
         }
 
         int interval = Math.max(1, task.config.getInt("interval-ticks", 10));
-
         plugin.getServer().getScheduler().scheduleRepeatingTask(task, interval);
     }
 
@@ -60,11 +58,31 @@ public class CrateParticleTask extends PluginTask<Main> {
                 continue;
             }
 
+            String cratePath = "crates." + crate.getName();
+
+            if (!config.getBoolean(cratePath + ".enabled", true)) {
+                continue;
+            }
+
             Location location = crate.getLocation();
 
             if (location == null || location.getLevel() == null) {
                 continue;
             }
+
+            String particleName = normalizeParticle(
+                    config.getString(cratePath + ".particle", defaultParticle)
+            );
+
+            double radius = Math.max(
+                    0.1,
+                    config.getDouble(cratePath + ".radius", defaultRadius)
+            );
+
+            int points = Math.max(
+                    1,
+                    config.getInt(cratePath + ".points", defaultPoints)
+            );
 
             Level level = location.getLevel();
 
@@ -76,8 +94,7 @@ public class CrateParticleTask extends PluginTask<Main> {
                 double y = location.getY() + 1.0;
 
                 Vector3 position = new Vector3(x, y, z);
-
-                Particle particle = createParticle(position);
+                Particle particle = createParticle(position, particleName);
 
                 if (particle != null) {
                     level.addParticle(particle);
@@ -86,17 +103,31 @@ public class CrateParticleTask extends PluginTask<Main> {
         }
     }
 
-    private Particle createParticle(Vector3 position) {
-        switch (particleType) {
-            case "SMOKE":
-                return new SmokeParticle(position);
+    private Particle createParticle(Vector3 position, String particleName) {
+        Integer particleId = Particle.getParticleIdByName(particleName);
 
-            case "HEART":
-                return new HeartParticle(position);
-
-            case "FLAME":
-            default:
-                return new FlameParticle(position);
+        if (particleId == null) {
+            particleId = Particle.getParticleIdByName(defaultParticle);
         }
+
+        if (particleId == null) {
+            particleId = Particle.TYPE_FLAME;
+        }
+
+        return new GenericParticle(position, particleId);
+    }
+
+    private static String normalizeParticle(String particleName) {
+        if (particleName == null || particleName.trim().isEmpty()) {
+            return "FLAME";
+        }
+
+        String normalized = particleName.trim().toUpperCase();
+
+        if (normalized.startsWith("TYPE_")) {
+            normalized = normalized.substring(5);
+        }
+
+        return normalized;
     }
 }
