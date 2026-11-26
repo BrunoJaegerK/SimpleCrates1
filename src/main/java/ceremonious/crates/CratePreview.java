@@ -13,6 +13,7 @@ import java.util.Map;
 public class CratePreview {
 
     private static final int INVENTORY_SIZE = 54;
+    private static final int PAPER_ITEM_ID = 339;
 
     /*
      * Minecraft legacy colors supported by Bedrock clients.
@@ -57,7 +58,7 @@ public class CratePreview {
 
         int slot = 0;
 
-        // Mostrar únicamente recompensas de tipo Item.
+        // Mostrar recompensas de objetos y comandos.
         for (Map.Entry<Reward, Integer> entry :
                 crate.getRewards().entrySet()) {
 
@@ -67,46 +68,65 @@ public class CratePreview {
 
             Reward reward = entry.getKey();
 
-            if (reward == null ||
-                    reward.getType() != RewardType.Item) {
+            if (reward == null || reward.getType() == null) {
                 continue;
             }
 
-            Item originalItem = reward.getItemReward();
-
-            if (originalItem == null ||
-                    originalItem.getId() == 0) {
-                continue;
-            }
-
-            // Clonar para no modificar la recompensa original.
-            Item previewItem = originalItem.clone();
-
-            // Conservar el lore original.
+            Item previewItem;
             List<String> lore = new ArrayList<>();
 
-            String[] originalLore = previewItem.getLore();
+            if (reward.getType() == RewardType.Item) {
+                Item originalItem = reward.getItemReward();
 
-            if (originalLore != null) {
-                for (String line : originalLore) {
-                    lore.add(line);
+                if (originalItem == null || originalItem.getId() == 0) {
+                    continue;
                 }
+
+                // Clonar para no modificar la recompensa original.
+                previewItem = originalItem.clone();
+
+                // Conservar el lore original.
+                String[] originalLore = previewItem.getLore();
+
+                if (originalLore != null) {
+                    for (String line : originalLore) {
+                        lore.add(line);
+                    }
+                }
+
+                lore.add(" ");
+
+                String customName = previewItem.getCustomName();
+
+                if (customName == null || customName.isEmpty()) {
+                    customName = previewItem.getName();
+                }
+
+                lore.add("§7Nombre: §f" + customName);
+                lore.add("§7Cantidad: §f" + originalItem.getCount());
+
+            } else if (reward.getType() == RewardType.ConsoleCommand
+                    || reward.getType() == RewardType.PlayerCommand) {
+
+                // Las recompensas de comando se representan con una hoja.
+                previewItem = Item.get(PAPER_ITEM_ID);
+                previewItem.setCustomName(
+                        reward.getType() == RewardType.ConsoleCommand
+                                ? "§eRecompensa de comando (Consola)"
+                                : "§bRecompensa de comando (Jugador)"
+                );
+
+                lore.add("§7Tipo: §f" +
+                        (reward.getType() == RewardType.ConsoleCommand
+                                ? "Comando de consola"
+                                : "Comando de jugador"));
+                lore.add(" ");
+                lore.add("§7Comando:");
+                lore.add("§f" + reward.getRewardCommand());
+
+            } else {
+                continue;
             }
-
-            // Separador visual.
-            lore.add(" ");
-
-            // Nombre de la recompensa.
-            String customName = previewItem.getCustomName();
-
-            if (customName == null || customName.isEmpty()) {
-                customName = previewItem.getName();
-            }
-
-            lore.add("§7Nombre: §f" + customName);
-
-            // Cantidad que recibe el jugador.
-            lore.add("§7Cantidad: §f" + originalItem.getCount());
 
             // Probabilidad real basada en todos los pesos.
             int weight = entry.getValue() != null
@@ -118,6 +138,7 @@ public class CratePreview {
                     : 0.0;
 
             String probabilityColor = getProbabilityColor(chance);
+            lore.add(" ");
             lore.add("§7Probabilidad: §7→ " + probabilityColor
                     + String.format(Locale.US, "%.2f", chance) + "%");
 

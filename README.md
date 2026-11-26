@@ -38,14 +38,16 @@ The plugin is developed and adapted for **NukkitPetteriM1Edition**.
 
 **🎨 Particle Effects**
 - Configurable particles around crates.
-- Available particle types: FLAME, SMOKE and HEART.
-- Adjustable particle interval, radius and number of points.
-- Enable or disable effects through `effects.yml`.
+- Expanded Bedrock particle selection, including FLAME, SMOKE, HEART, PORTAL, END_ROD, TOTEM, SOUL, VILLAGER_HAPPY, WITCH_SPELL, DRAGON_BREATH, FIREWORKS_SPARK, ELECTRIC_SPARK, CHERRY_LEAVES and many more.
+- Configure the default particle, interval, radius and number of points.
+- Override particle type, enabled state, radius and points separately for each crate in `effects.yml`.
 
 **🔍 Reward Preview**
 - Inventory interface powered by FakeInventories.
+- Displays item rewards and command rewards together.
+- Represents console and player command rewards with a paper item, showing the command type and command text in its lore.
 - Displays reward names, lore and quantities.
-- Shows the probability assigned to each reward.
+- Shows the weighted probability assigned to each reward.
 
 **🔊 Crate Effects**
 - Knockback and sound effects when a player attempts to open a crate without a key.
@@ -97,12 +99,30 @@ SimpleCrates generates configuration files in its plugin folder.
 
 Configure the particles displayed around your crates.
 
-Available particle types:
-- `FLAME`
-- `SMOKE`
-- `HEART`
+Particle types are resolved from the particle IDs supported by the installed NukkitPetteriM1Edition build. Common options include:
 
-You can enable or disable particles and customize their interval, radius and distribution points.
+`BUBBLE`, `CRITICAL`, `SMOKE`, `EXPLODE`, `FLAME`, `CANDLE_FLAME`, `LAVA`, `LARGE_SMOKE`, `REDSTONE`, `ITEM_BREAK`, `SNOWBALL_POOF`, `HUGE_EXPLODE`, `HEART`, `PORTAL`, `SPLASH`, `DRIP_WATER`, `DRIP_LAVA`, `MOB_SPELL`, `MOB_SPELL_AMBIENT`, `INK`, `SLIME`, `RAIN_SPLASH`, `VILLAGER_ANGRY`, `VILLAGER_HAPPY`, `ENCHANTMENT_TABLE`, `NOTE`, `WITCH_SPELL`, `END_ROD`, `DRAGON_BREATH`, `TOTEM`, `FOOD`, `FIREWORKS_SPARK`, `COLORED_FLAME`, `CONDUIT`, `SNEEZE`, `CAMPFIRE_SMOKE`, `BLUE_FLAME`, `SOUL`, `OBSIDIAN_TEAR`, `SNOWFLAKE`, `SPORE_BLOSSOM_SHOWER`, `WAX`, `ELECTRIC_SPARK`, `SHRIEK`, `SCULK_SOUL`, `SONIC_EXPLOSION`, `CHERRY_LEAVES`, `DUST_PLUME`, `WHITE_SMOKE` and `WIND_EXPLOSION`.
+
+Global settings:
+
+- `enabled`: enables or disables all crate particles.
+- `particle`: default particle used by crates without an override.
+- `interval-ticks`: global update interval (20 ticks = 1 second).
+- `radius`: default radius around the crate.
+- `points`: default number of particle positions around the crate.
+
+Per-crate overrides can be added under `crates.<crate-name>`:
+
+```yaml
+crates:
+  default:
+    enabled: true
+    particle: HEART
+    radius: 0.9
+    points: 10
+```
+
+Each per-crate value is optional and inherits the global setting when omitted. The crate name must match its key under `crates` in `config.yml`.
 
 ### 🎬 animations.yml
 

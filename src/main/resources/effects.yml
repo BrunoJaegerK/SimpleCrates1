@@ -2,25 +2,38 @@
 # SimpleCrates - Particle Effects
 # ==========================================
 
-# Activar o desactivar las partículas.
-# true = activadas | false = desactivadas
+# Activar o desactivar todas las particulas de las crates.
 enabled: true
 
-# Tipo de partícula disponible:
-# FLAME  = Llamas.
-# SMOKE  = Humo.
-# HEART  = Corazones.
+# Particula global utilizada cuando una crate no tiene una personalizada.
+# Puedes usar cualquiera de estos tipos:
+# BUBBLE, CRITICAL, SMOKE, EXPLODE, FLAME, CANDLE_FLAME, LAVA,
+# LARGE_SMOKE, REDSTONE, ITEM_BREAK, SNOWBALL_POOF, HUGE_EXPLODE,
+# HEART, PORTAL, SPLASH, WATER_WAKE, DRIP_WATER, DRIP_LAVA,
+# MOB_SPELL, MOB_SPELL_AMBIENT, INK, SLIME, RAIN_SPLASH,
+# VILLAGER_ANGRY, VILLAGER_HAPPY, ENCHANTMENT_TABLE, NOTE,
+# WITCH_SPELL, CARROT, END_ROD, DRAGON_BREATH, SPIT, TOTEM,
+# FOOD, FIREWORKS_SPARK, COLORED_FLAME, CONDUIT, SNEEZE,
+# MYCELIUM_DUST, CAMPFIRE_SMOKE, TALL_CAMPFIRE_SMOKE,
+# BLUE_FLAME, SOUL, OBSIDIAN_TEAR, SNOWFLAKE,
+# SPORE_BLOSSOM_SHOWER, SPORE_BLOSSOM_AMBIENT, WAX,
+# ELECTRIC_SPARK, SHRIEK, SCULK_SOUL, SONIC_EXPLOSION,
+# CHERRY_LEAVES, DUST_PLUME, WHITE_SMOKE, WIND_EXPLOSION.
 particle: FLAME
 
-# Intervalo entre ejecuciones, expresado en ticks.
-# 20 ticks = 1 segundo.
-# Un valor menor produce partículas con mayor frecuencia.
+# Intervalo global entre ejecuciones (20 ticks = 1 segundo).
 interval-ticks: 10
 
-# Distancia desde el centro de la crate.
-# Controla el radio de distribución de las partículas.
+# Radio y cantidad de puntos globales.
 radius: 0.7
-
-# Cantidad de puntos donde aparecen las partículas
-# alrededor de la crate.
 points: 8
+
+# Personalizacion individual por crate.
+# Los valores no indicados heredan la configuracion global.
+# El nombre debe coincidir con la clave de la crate en config.yml.
+crates:
+  default:
+    enabled: true
+    particle: HEART
+    radius: 0.9
+    points: 10
