@@ -14,6 +14,19 @@ public class CratePreview {
 
     private static final int INVENTORY_SIZE = 54;
 
+    /*
+     * Minecraft legacy colors supported by Bedrock clients.
+     * The palette follows a red -> yellow -> green probability gradient.
+     */
+    private static final ProbabilityColor[] PROBABILITY_COLORS = {
+            new ProbabilityColor('4', 170, 0, 0),
+            new ProbabilityColor('c', 255, 85, 85),
+            new ProbabilityColor('6', 255, 170, 0),
+            new ProbabilityColor('e', 255, 255, 85),
+            new ProbabilityColor('a', 85, 255, 85),
+            new ProbabilityColor('2', 0, 170, 0)
+    };
+
     private CratePreview() {
     }
 
@@ -104,8 +117,9 @@ public class CratePreview {
                     ? (weight * 100.0) / totalWeight
                     : 0.0;
 
-            lore.add("§7Probabilidad: §a" +
-                    String.format(Locale.US, "%.2f", chance) + "%");
+            String probabilityColor = getProbabilityColor(chance);
+            lore.add("§7Probabilidad: §7→ " + probabilityColor
+                    + String.format(Locale.US, "%.2f", chance) + "%");
 
             // Aplicar información adicional sin alterar el objeto original.
             previewItem.setLore(lore.toArray(new String[0]));
@@ -116,5 +130,61 @@ public class CratePreview {
 
         player.addWindow(inventory);
     }
-}
 
+    /**
+     * Returns the closest supported Minecraft legacy color for a smooth
+     * red (low chance) -> yellow (medium chance) -> green (high chance)
+     * probability gradient.
+     */
+    private static String getProbabilityColor(double chance) {
+        double percentage = Math.max(0.0, Math.min(100.0, chance));
+
+        int red;
+        int green;
+        int blue = 85;
+
+        if (percentage <= 50.0) {
+            double progress = percentage / 50.0;
+            red = 255;
+            green = (int) Math.round(85 + (170 * progress));
+        } else {
+            double progress = (percentage - 50.0) / 50.0;
+            red = (int) Math.round(255 - (170 * progress));
+            green = 255;
+        }
+
+        ProbabilityColor closest = PROBABILITY_COLORS[0];
+        double closestDistance = Double.MAX_VALUE;
+
+        for (ProbabilityColor color : PROBABILITY_COLORS) {
+            double redDifference = red - color.red;
+            double greenDifference = green - color.green;
+            double blueDifference = blue - color.blue;
+
+            double distance = redDifference * redDifference
+                    + greenDifference * greenDifference
+                    + blueDifference * blueDifference;
+
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closest = color;
+            }
+        }
+
+        return "§" + closest.code;
+    }
+
+    private static final class ProbabilityColor {
+        private final char code;
+        private final int red;
+        private final int green;
+        private final int blue;
+
+        private ProbabilityColor(char code, int red, int green, int blue) {
+            this.code = code;
+            this.red = red;
+            this.green = green;
+            this.blue = blue;
+        }
+    }
+}
