@@ -60,7 +60,10 @@ public class CrateParticleTask extends PluginTask<Main> {
 
             String cratePath = "crates." + crate.getName();
 
-            if (!config.getBoolean(cratePath + ".enabled", true)) {
+            boolean particlesEnabled = crate.hasParticleEnabledSetting()
+                    ? crate.isParticleEnabled()
+                    : config.getBoolean(cratePath + ".enabled", true);
+            if (!particlesEnabled) {
                 continue;
             }
 
@@ -70,19 +73,23 @@ public class CrateParticleTask extends PluginTask<Main> {
                 continue;
             }
 
-            String particleName = normalizeParticle(
-                    config.getString(cratePath + ".particle", defaultParticle)
-            );
+            String configuredParticle = crate.getParticleName();
+            if (configuredParticle == null || configuredParticle.trim().isEmpty()) {
+                configuredParticle = config.getString(cratePath + ".particle", defaultParticle);
+            }
+            String particleName = normalizeParticle(configuredParticle);
 
-            double radius = Math.max(
-                    0.1,
-                    config.getDouble(cratePath + ".radius", defaultRadius)
-            );
+            double configuredRadius = crate.getParticleRadius();
+            if (configuredRadius <= 0) {
+                configuredRadius = config.getDouble(cratePath + ".radius", defaultRadius);
+            }
+            double radius = Math.max(0.1, configuredRadius);
 
-            int points = Math.max(
-                    1,
-                    config.getInt(cratePath + ".points", defaultPoints)
-            );
+            int configuredPoints = crate.getParticlePoints();
+            if (configuredPoints <= 0) {
+                configuredPoints = config.getInt(cratePath + ".points", defaultPoints);
+            }
+            int points = Math.max(1, configuredPoints);
 
             Level level = location.getLevel();
 
