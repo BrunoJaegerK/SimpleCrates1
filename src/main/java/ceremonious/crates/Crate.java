@@ -15,6 +15,11 @@ public class Crate {
    private boolean hasLocation = false;
    private boolean virtual = false;
    private int rounds = 1;
+   private boolean particleEnabled = true;
+   private boolean particleEnabledConfigured = false;
+   private String particleName;
+   private double particleRadius = -1.0;
+   private int particlePoints = -1;
 
    public Crate(String name) {
       this.name = name;
@@ -85,6 +90,44 @@ public class Crate {
 
    public int getRounds() {
       return this.rounds;
+   }
+
+
+   public boolean isParticleEnabled() {
+      return this.particleEnabled;
+   }
+
+   public void setParticleEnabled(boolean enabled) {
+      this.particleEnabled = enabled;
+      this.particleEnabledConfigured = true;
+   }
+
+   public boolean hasParticleEnabledSetting() {
+      return this.particleEnabledConfigured;
+   }
+
+   public String getParticleName() {
+      return this.particleName;
+   }
+
+   public void setParticleName(String particleName) {
+      this.particleName = particleName;
+   }
+
+   public double getParticleRadius() {
+      return this.particleRadius;
+   }
+
+   public void setParticleRadius(double radius) {
+      this.particleRadius = radius;
+   }
+
+   public int getParticlePoints() {
+      return this.particlePoints;
+   }
+
+   public void setParticlePoints(int points) {
+      this.particlePoints = points;
    }
 
    public HashMap<Reward, Integer> getRewards() {
