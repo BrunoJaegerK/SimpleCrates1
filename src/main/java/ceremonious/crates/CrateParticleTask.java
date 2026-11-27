@@ -80,13 +80,13 @@ public class CrateParticleTask extends PluginTask<Main> {
             String particleName = normalizeParticle(configuredParticle);
 
             double configuredRadius = crate.getParticleRadius();
-            if (configuredRadius <= 0) {
+            if (configuredRadius < 0) {
                 configuredRadius = config.getDouble(cratePath + ".radius", defaultRadius);
             }
             double radius = Math.max(0.1, configuredRadius);
 
             int configuredPoints = crate.getParticlePoints();
-            if (configuredPoints <= 0) {
+            if (configuredPoints < 0) {
                 configuredPoints = config.getInt(cratePath + ".points", defaultPoints);
             }
             int points = Math.max(1, configuredPoints);
