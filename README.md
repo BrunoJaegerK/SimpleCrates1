@@ -40,7 +40,7 @@ The plugin is developed and adapted for **NukkitPetteriM1Edition**.
 - Configurable particles around crates.
 - Expanded Bedrock particle selection, including FLAME, SMOKE, HEART, PORTAL, END_ROD, TOTEM, SOUL, VILLAGER_HAPPY, WITCH_SPELL, DRAGON_BREATH, FIREWORKS_SPARK, ELECTRIC_SPARK, CHERRY_LEAVES and many more.
 - Configure the default particle, interval, radius and number of points.
-- Override particle type, enabled state, radius and points separately for each crate in `effects.yml`.
+- Configure each crate's particle type, enabled state, radius and points directly in its `config.yml` crate section. Existing `effects.yml` per-crate overrides remain supported as a fallback for older configurations.
 
 **🔍 Reward Preview**
 - Inventory interface powered by FakeInventories.
@@ -111,18 +111,33 @@ Global settings:
 - `radius`: default radius around the crate.
 - `points`: default number of particle positions around the crate.
 
-Per-crate overrides can be added under `crates.<crate-name>`:
+Per-crate particle options are configured directly inside the crate definition in `config.yml`, alongside `displayname`, `rounds` and `key`:
 
 ```yaml
 crates:
-  default:
+  rare:
+    displayname: rare
+    rounds: 1
     enabled: true
     particle: HEART
     radius: 0.9
     points: 10
+    key:
+      virtual: false
+      id: 131
+      durability: 0
+      name: "Rare Key"
+      lore:
+        - "&eUse on the rare crate!"
 ```
 
-Each per-crate value is optional and inherits the global setting when omitted. The crate name must match its key under `crates` in `config.yml`.
+The particle options are independent for each crate:
+- `enabled`: enables or disables particles for this crate.
+- `particle`: particle name supported by the installed PM1E build (for example `HEART`).
+- `radius`: radius of the particle ring around the crate.
+- `points`: number of particle positions in the ring.
+
+If a particle option is omitted, the plugin uses the matching legacy per-crate value from `effects.yml`, then the global value from `effects.yml`. The old `effects.yml` format remains compatible.
 
 ### 🎬 animations.yml
 

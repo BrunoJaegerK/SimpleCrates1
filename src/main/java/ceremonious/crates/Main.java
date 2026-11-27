@@ -60,6 +60,10 @@ public class Main extends PluginBase implements Listener {
       cs.set("version", ver);
       cs.set("options.prefix", "&f[&e&lSC&r&f]&f");
       cs.set("crates.default.displayname", "&e&lSimple Crate");
+      cs.set("crates.default.enabled", true);
+      cs.set("crates.default.particle", "FLAME");
+      cs.set("crates.default.radius", 0.7);
+      cs.set("crates.default.points", 8);
       cs.set("crates.default.rounds", 1);
       cs.set("crates.default.key.virtual", false);
       cs.set("crates.default.key.id", 131);
@@ -133,6 +137,21 @@ public class Main extends PluginBase implements Listener {
             }
 
             Crate crate = new Crate(cratename);
+
+            // Particle settings can be configured directly inside config.yml under crates.<name>.
+            String particlePath = cratename + ".";
+            if (section.exists(particlePath + "enabled")) {
+               crate.setParticleEnabled(this.config.getBoolean("crates." + cratename + ".enabled", true));
+            }
+            if (section.exists(particlePath + "particle")) {
+               crate.setParticleName(this.config.getString("crates." + cratename + ".particle"));
+            }
+            if (section.exists(particlePath + "radius")) {
+               crate.setParticleRadius(this.config.getDouble("crates." + cratename + ".radius", -1.0));
+            }
+            if (section.exists(particlePath + "points")) {
+               crate.setParticlePoints(this.config.getInt("crates." + cratename + ".points", -1));
+            }
             int getrounds = this.config.getInt("crates." + cratename + ".rounds");
             if (getrounds <= 0) {
                crate.setRounds(1);
